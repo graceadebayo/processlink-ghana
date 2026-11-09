@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,41 +8,90 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role { INVESTOR OPERATOR CUSTOMER ADMIN }
-enum UserStatus { PENDING VERIFIED SUSPENDED }
-enum ProjectStatus { DRAFT PENDING_APPROVAL FUNDING FUNDED ACTIVE CLOSED REJECTED }
-enum ApplicationStatus { PENDING APPROVED REJECTED }
-enum JobStatus { REQUESTED ACCEPTED IN_PROGRESS COMPLETED PAID CANCELLED DECLINED }
-enum PaymentMethod { SIMULATED_MOBILE_MONEY }
-enum PaymentStatus { PENDING SUCCESSFUL FAILED REFUNDED }
-enum ExpenseCategory { FUEL MAINTENANCE REPAIRS LABOUR OTHER }
+enum Role {
+  INVESTOR
+  OPERATOR
+  CUSTOMER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+}
+
+enum ProjectStatus {
+  DRAFT
+  PENDING_APPROVAL
+  FUNDING
+  FUNDED
+  ACTIVE
+  CLOSED
+  REJECTED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum JobStatus {
+  REQUESTED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  PAID
+  CANCELLED
+  DECLINED
+}
+
+enum PaymentMethod {
+  SIMULATED_MOBILE_MONEY
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  REFUNDED
+}
+
+enum ExpenseCategory {
+  FUEL
+  MAINTENANCE
+  REPAIRS
+  LABOUR
+  OTHER
+}
 
 model User {
-  id               String   @id @default(cuid())
-  name             String
-  email            String   @unique
-  phone            String?
-  passwordHash     String
-  role             Role
-  status           UserStatus @default(PENDING)
-  idDocumentNote   String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  sessions         Session[]
-  passwordResetTokens PasswordResetToken[]
-  projectsOperated Equipment[] @relation("ProjectOperator")
-  projectsSubmitted Equipment[] @relation("ProjectSubmitter")
-  applications     OperatorApplication[]
-  investments      Investment[]
-  customerJobs     Job[] @relation("CustomerJobs")
-  operatorJobs     Job[] @relation("OperatorJobs")
-  payments         Payment[]
-  expensesRecorded Expense[] @relation("ExpenseRecorder")
-  payouts          InvestorPayout[]
-  reviewsGiven     Review[] @relation("ReviewCustomer")
-  reviewsReceived  Review[] @relation("ReviewOperator")
-  notifications    Notification[]
-  auditLogs        AuditLog[]
+  id                   String   @id @default(cuid())
+  name                 String
+  email                String   @unique
+  phone                String?
+  passwordHash         String
+  role                 Role
+  status               UserStatus @default(PENDING)
+  idDocumentNote       String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  sessions             Session[]
+  passwordResetTokens  PasswordResetToken[]
+  projectsOperated     Equipment[] @relation("ProjectOperator")
+  projectsSubmitted    Equipment[] @relation("ProjectSubmitter")
+  applications         OperatorApplication[]
+  investments          Investment[]
+  customerJobs         Job[] @relation("CustomerJobs")
+  operatorJobs         Job[] @relation("OperatorJobs")
+  payments             Payment[]
+  expensesRecorded     Expense[] @relation("ExpenseRecorder")
+  payouts              InvestorPayout[]
+  reviewsGiven         Review[] @relation("ReviewCustomer")
+  reviewsReceived      Review[] @relation("ReviewOperator")
+  notifications       Notification[]
+  auditLogs            AuditLog[]
 }
 
 model Session {
@@ -51,172 +101,181 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([expiresAt])
 }
 
 model Equipment {
-  id                String @id @default(cuid())
+  id                String   @id @default(cuid())
   title             String
   equipmentType     String
   description       String
-  region             String
-  town               String
-  cost               Decimal @db.Decimal(14,2)
-  fundingTarget      Decimal @db.Decimal(14,2)
-  amountRaised       Decimal @default(0) @db.Decimal(14,2)
-  fundingDeadline    DateTime?
-  status             ProjectStatus @default(DRAFT)
-  operatorId         String?
-  submittedById      String?
-  platformFeePct     Decimal @default(10) @db.Decimal(5,2)
-  operatorSharePct   Decimal @default(40) @db.Decimal(5,2)
-  investorSharePct   Decimal @default(50) @db.Decimal(5,2)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  operator           User? @relation("ProjectOperator", fields: [operatorId], references: [id], onDelete: SetNull)
-  submittedBy        User? @relation("ProjectSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
+  region            String
+  town              String
+  cost              Decimal  @db.Decimal(14, 2)
+  fundingTarget     Decimal  @db.Decimal(14, 2)
+  amountRaised      Decimal  @default(0) @db.Decimal(14, 2)
+  fundingDeadline   DateTime?
+  status            ProjectStatus @default(DRAFT)
+  operatorId        String?
+  submittedById     String?
+  platformFeePct    Decimal  @default(10) @db.Decimal(5, 2)
+  operatorSharePct  Decimal  @default(40) @db.Decimal(5, 2)
+  investorSharePct  Decimal  @default(50) @db.Decimal(5, 2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  operator          User?    @relation("ProjectOperator", fields: [operatorId], references: [id], onDelete: SetNull)
+  submittedBy       User?    @relation("ProjectSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
   applications      OperatorApplication[]
   investments       Investment[]
   jobs              Job[]
   expenses          Expense[]
   distributions     Distribution[]
+
   @@index([status, region, equipmentType])
 }
 
 model OperatorApplication {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
   operatorId  String
   equipmentId String
   experience  String
   status      ApplicationStatus @default(PENDING)
   createdAt   DateTime @default(now())
-  operator    User @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+  operator    User     @relation(fields: [operatorId], references: [id], onDelete: Cascade)
   equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
   @@unique([operatorId, equipmentId])
 }
 
 model Investment {
-  id                 String @id @default(cuid())
-  investorId         String
-  equipmentId        String
-  amount             Decimal @db.Decimal(14,2)
+  id                  String   @id @default(cuid())
+  investorId          String
+  equipmentId         String
+  amount              Decimal  @db.Decimal(14, 2)
   simulatedPaymentRef String
-  createdAt          DateTime @default(now())
-  investor           User @relation(fields: [investorId], references: [id], onDelete: Restrict)
-  equipment          Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  createdAt           DateTime @default(now())
+  investor            User     @relation(fields: [investorId], references: [id], onDelete: Restrict)
+  equipment           Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+
   @@index([investorId, equipmentId])
 }
 
 model Job {
-  id           String @id @default(cuid())
-  customerId   String
-  equipmentId  String
-  operatorId   String
-  produceType  String
-  quantityKg   Decimal @db.Decimal(12,2)
-  location     String
+  id            String   @id @default(cuid())
+  customerId    String
+  equipmentId   String
+  operatorId    String
+  produceType   String
+  quantityKg    Decimal  @db.Decimal(12, 2)
+  location      String
   preferredDate DateTime
-  price        Decimal @db.Decimal(14,2)
-  status       JobStatus @default(REQUESTED)
-  createdAt    DateTime @default(now())
-  completedAt  DateTime?
-  customer     User @relation("CustomerJobs", fields: [customerId], references: [id], onDelete: Restrict)
-  equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
-  operator     User @relation("OperatorJobs", fields: [operatorId], references: [id], onDelete: Restrict)
-  payments     Payment[]
-  expenses     Expense[]
-  review       Review?
+  price         Decimal  @db.Decimal(14, 2)
+  status        JobStatus @default(REQUESTED)
+  createdAt     DateTime @default(now())
+  completedAt   DateTime?
+  customer      User     @relation("CustomerJobs", fields: [customerId], references: [id], onDelete: Restrict)
+  equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  operator      User     @relation("OperatorJobs", fields: [operatorId], references: [id], onDelete: Restrict)
+  payments      Payment[]
+  expenses      Expense[]
+  review        Review?
+
   @@index([customerId, status])
   @@index([operatorId, status])
 }
 
 model Payment {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   jobId     String
   payerId   String
-  amount    Decimal @db.Decimal(14,2)
+  amount    Decimal  @db.Decimal(14, 2)
   method    PaymentMethod @default(SIMULATED_MOBILE_MONEY)
   status    PaymentStatus @default(PENDING)
-  reference String @unique
+  reference String   @unique
   createdAt DateTime @default(now())
-  job       Job @relation(fields: [jobId], references: [id], onDelete: Restrict)
-  payer     User @relation(fields: [payerId], references: [id], onDelete: Restrict)
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Restrict)
+  payer     User     @relation(fields: [payerId], references: [id], onDelete: Restrict)
 }
 
 model Expense {
-  id             String @id @default(cuid())
-  equipmentId    String
-  jobId          String?
-  amount         Decimal @db.Decimal(14,2)
-  category       ExpenseCategory
-  note           String?
+  id              String   @id @default(cuid())
+  equipmentId     String
+  jobId           String?
+  amount          Decimal  @db.Decimal(14, 2)
+  category        ExpenseCategory
+  note            String?
   receiptImageUrl String?
-  recordedBy     String
-  createdAt      DateTime @default(now())
-  equipment      Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
-  job            Job? @relation(fields: [jobId], references: [id], onDelete: SetNull)
-  recorder       User @relation("ExpenseRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+  recordedBy      String
+  createdAt       DateTime @default(now())
+  equipment       Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  job             Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  recorder        User     @relation("ExpenseRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
 }
 
 model Distribution {
-  id              String @id @default(cuid())
-  equipmentId     String
-  periodStart     DateTime
-  periodEnd       DateTime
-  grossRevenue    Decimal @db.Decimal(14,2)
-  expenses        Decimal @db.Decimal(14,2)
-  netRevenue      Decimal @db.Decimal(14,2)
-  platformAmount  Decimal @db.Decimal(14,2)
-  operatorAmount  Decimal @db.Decimal(14,2)
-  investorPool    Decimal @db.Decimal(14,2)
-  createdAt       DateTime @default(now())
-  equipment       Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
-  payouts         InvestorPayout[]
+  id             String   @id @default(cuid())
+  equipmentId    String
+  periodStart    DateTime
+  periodEnd      DateTime
+  grossRevenue   Decimal  @db.Decimal(14, 2)
+  expenses       Decimal  @db.Decimal(14, 2)
+  netRevenue     Decimal  @db.Decimal(14, 2)
+  platformAmount Decimal  @db.Decimal(14, 2)
+  operatorAmount Decimal  @db.Decimal(14, 2)
+  investorPool   Decimal  @db.Decimal(14, 2)
+  createdAt      DateTime @default(now())
+  equipment      Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+  payouts        InvestorPayout[]
+
   @@unique([equipmentId, periodStart, periodEnd])
 }
 
 model InvestorPayout {
-  id             String @id @default(cuid())
+  id             String   @id @default(cuid())
   distributionId String
   investorId     String
-  amount         Decimal @db.Decimal(14,2)
+  amount         Decimal  @db.Decimal(14, 2)
   distribution   Distribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
-  investor       User @relation(fields: [investorId], references: [id], onDelete: Restrict)
+  investor       User     @relation(fields: [investorId], references: [id], onDelete: Restrict)
+
   @@unique([distributionId, investorId])
 }
 
 model Review {
-  id         String @id @default(cuid())
-  jobId      String @unique
+  id         String   @id @default(cuid())
+  jobId      String   @unique
   customerId String
   operatorId String
   rating     Int
   comment    String?
   createdAt  DateTime @default(now())
-  job        Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  customer   User @relation("ReviewCustomer", fields: [customerId], references: [id], onDelete: Restrict)
-  operator   User @relation("ReviewOperator", fields: [operatorId], references: [id], onDelete: Restrict)
+  job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  customer   User     @relation("ReviewCustomer", fields: [customerId], references: [id], onDelete: Restrict)
+  operator   User     @relation("ReviewOperator", fields: [operatorId], references: [id], onDelete: Restrict)
 }
 
 model Notification {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   message   String
-  read      Boolean @default(false)
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId, read, createdAt])
 }
 
 model AuditLog {
-  id         String @id @default(cuid())
+  id         String   @id @default(cuid())
   adminId    String
   action     String
   targetType String
   targetId   String
   createdAt  DateTime @default(now())
-  admin      User @relation(fields: [adminId], references: [id], onDelete: Restrict)
+  admin      User     @relation(fields: [adminId], references: [id], onDelete: Restrict)
+
   @@index([adminId, createdAt])
 }
 
@@ -228,5 +287,6 @@ model PasswordResetToken {
   usedAt    DateTime?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId, expiresAt])
 }
