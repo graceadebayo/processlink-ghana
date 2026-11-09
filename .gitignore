@@ -8,3 +8,7 @@ coverage
 
 # Private local prototype uploads
 .data/
+.neon
+
+.vercel
+.env*
