@@ -1,0 +1,15 @@
+import { requireRole } from '@/lib/auth';
+import { Role } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { DashboardShell } from '@/components/dashboard-shell';
+export default async function AdminDashboard() {
+  const user = await requireRole(Role.ADMIN);
+  const [users, projects, jobs, payments, audits, pendingProjects, pendingApplications] = await Promise.all([
+    prisma.user.count(), prisma.equipment.count(), prisma.job.count(), prisma.payment.aggregate({ where: { status: 'SUCCESSFUL' }, _sum: { amount: true } }),
+    prisma.auditLog.findMany({ include: { admin: true }, orderBy: { createdAt: 'desc' }, take: 10 }),
+    prisma.equipment.count({ where: { status: 'PENDING_APPROVAL' } }), prisma.operatorApplication.count({ where: { status: 'PENDING' } }),
+  ]);
+  return <DashboardShell role="ADMIN" name={user.name}><h1 className="text-2xl font-black text-[#173f30] md:text-3xl">Platform overview</h1><p className="mt-2 text-sm text-[#718077]">A snapshot of ProcessLink Ghana activity.</p><div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><Metric label="Registered users" value={String(users)}/><Metric label="Equipment projects" value={String(projects)}/><Metric label="Jobs on record" value={String(jobs)}/><Metric label="Simulated payments" value={money(Number(payments._sum.amount ?? 0))}/></div><section id="users" className="mt-9 grid gap-4 sm:grid-cols-2"><a href="/dashboard/admin/projects" className="rounded-2xl border border-[#e3e9e2] bg-white p-5 hover:border-[#174b38]"><p className="text-sm text-[#718077]">Projects awaiting approval</p><p className="mt-2 text-3xl font-black text-[#174b38]">{pendingProjects}</p><p className="mt-2 text-sm font-bold text-[#315c43]">Review projects →</p></a><a href="/dashboard/admin/applications" className="rounded-2xl border border-[#e3e9e2] bg-white p-5 hover:border-[#174b38]"><p className="text-sm text-[#718077]">Pending operator applications</p><p className="mt-2 text-3xl font-black text-[#174b38]">{pendingApplications}</p><p className="mt-2 text-sm font-bold text-[#315c43]">Review applications →</p></a></section><section id="audit" className="mt-8"><h2 className="font-extrabold text-[#173f30]">Recent audit activity</h2>{audits.length ? <div className="mt-3 space-y-2">{audits.map(a=><div key={a.id} className="rounded-xl border border-[#e3e9e2] bg-white p-4"><p className="text-sm font-bold text-[#244535]">{a.action}</p><p className="mt-1 text-xs text-[#78857c]">{a.admin.name} · {a.targetType} · {a.createdAt.toLocaleString('en-GH')}</p></div>)}</div>:<p className="mt-3 rounded-xl bg-white p-5 text-sm text-[#78857c]">No administrative activity has been recorded yet.</p>}</section></DashboardShell>;
+}
+function Metric({label,value}:{label:string;value:string}){return <div className="rounded-2xl border border-[#e3e9e2] bg-white p-5"><p className="text-sm font-semibold text-[#718077]">{label}</p><p className="mt-3 text-2xl font-black text-[#174b38]">{value}</p></div>}
+function money(n:number){return new Intl.NumberFormat('en-GH',{style:'currency',currency:'GHS'}).format(n)}
