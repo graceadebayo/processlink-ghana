@@ -1,0 +1,282 @@
+
+import Link from 'next/link';
+import {
+  Prisma,
+  ProjectStatus,
+  Role,
+  UserStatus,
+} from '@prisma/client';
+
+import { prisma } from '@/lib/prisma';
+import { getCurrentUser } from '@/lib/auth';
+import { ProjectSubmitForm } from '@/components/projects/project-submit-form';
+
+const publicStatuses: ProjectStatus[] = [
+  ProjectStatus.FUNDING,
+  ProjectStatus.FUNDED,
+  ProjectStatus.ACTIVE,
+  ProjectStatus.CLOSED,
+];
+
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    type?: string;
+    region?: string;
+    status?: string;
+  }>;
+}) {
+  const filters = await searchParams;
+  const user = await getCurrentUser();
+
+  const selectedStatus =
+    filters.status &&
+    publicStatuses.includes(filters.status as ProjectStatus)
+      ? (filters.status as ProjectStatus)
+      : undefined;
+
+  const where: Prisma.EquipmentWhereInput = {
+    status: { in: publicStatuses },
+    ...(filters.type ? { equipmentType: filters.type } : {}),
+    ...(filters.region ? { region: filters.region } : {}),
+    ...(selectedStatus ? { status: selectedStatus } : {}),
+  };
+
+  const [projects, types, regions] = await Promise.all([
+    prisma.equipment.findMany({
+      where,
+      include: {
+        operator: true,
+        _count: { select: { jobs: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+
+    prisma.equipment.findMany({
+      where: { status: { in: publicStatuses } },
+      select: { equipmentType: true },
+      distinct: ['equipmentType'],
+    }),
+
+    prisma.equipment.findMany({
+      where: { status: { in: publicStatuses } },
+      select: { region: true },
+      distinct: ['region'],
+    }),
+  ]);
+
+  return (
+    <main className="min-h-screen px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-6xl">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-black uppercase tracking-widest text-[#a67a1b]">
+              Project marketplace
+            </p>
+
+            <h1 className="mt-2 text-3xl font-black text-[#153d2e]">
+              Explore equipment projects
+            </h1>
+
+            <p className="mt-2 text-sm text-[#718077]">
+              Discover approved processing equipment projects across Ghana.
+            </p>
+          </div>
+
+          {user?.role === Role.INVESTOR &&
+            user.status === UserStatus.VERIFIED && (
+              <a href="#submit-project" className="btn-primary">
+                Submit a project
+              </a>
+            )}
+        </div>
+
+        <form className="mt-7 grid gap-3 rounded-2xl border border-[#e3e9e2] bg-white p-4 sm:grid-cols-4">
+          <label className="field-label">
+            Equipment type
+            <select
+              name="type"
+              defaultValue={filters.type ?? ''}
+              className="field"
+            >
+              <option value="">All equipment</option>
+              {types.map((t) => (
+                <option key={t.equipmentType} value={t.equipmentType}>
+                  {t.equipmentType}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field-label">
+            Region
+            <select
+              name="region"
+              defaultValue={filters.region ?? ''}
+              className="field"
+            >
+              <option value="">All regions</option>
+              {regions.map((r) => (
+                <option key={r.region} value={r.region}>
+                  {r.region}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field-label">
+            Status
+            <select
+              name="status"
+              defaultValue={filters.status ?? ''}
+              className="field"
+            >
+              <option value="">All statuses</option>
+              {publicStatuses.map((s) => (
+                <option key={s} value={s}>
+                  {s.replaceAll('_', ' ')}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="flex items-end gap-2">
+            <button className="btn-primary flex-1">
+              Apply filters
+            </button>
+
+            <Link
+              href="/projects"
+              className="rounded-xl border border-[#d5ded6] px-4 py-3 text-sm font-bold text-[#315a43]"
+            >
+              Clear
+            </Link>
+          </div>
+        </form>
+
+        {projects.length ? (
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {projects.map((p) => {
+              const raised = Number(p.amountRaised);
+              const target = Number(p.fundingTarget);
+              const pct = Math.min(
+                100,
+                target ? (raised / target) * 100 : 0
+              );
+
+              return (
+                <article
+                  key={p.id}
+                  className="rounded-2xl border border-[#e3e9e2] bg-white p-5"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-[#edf3ed] px-3 py-1 text-[11px] font-bold uppercase text-[#315c43]">
+                      {p.status.replaceAll('_', ' ')}
+                    </span>
+
+                    <span className="text-xs text-[#7b877e]">
+                      {p.region}
+                    </span>
+                  </div>
+
+                  <h2 className="mt-4 text-lg font-extrabold text-[#244535]">
+                    {p.title}
+                  </h2>
+
+                  <p className="mt-1 text-sm text-[#718077]">
+                    {p.equipmentType} · {p.town}
+                  </p>
+
+                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#65736a]">
+                    {p.description}
+                  </p>
+
+                  <div className="mt-5 flex justify-between text-xs">
+                    <span className="font-semibold text-[#65736a]">
+                      Funding progress
+                    </span>
+                    <span className="font-bold text-[#174b38]">
+                      {pct.toFixed(0)}%
+                    </span>
+                  </div>
+
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#e8eee8]">
+                    <div
+                      className="h-full rounded-full bg-[#2c7652]"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+
+                  <div className="mt-3 flex justify-between text-sm">
+                    <span className="font-extrabold text-[#174b38]">
+                      {money(raised)}
+                    </span>
+                    <span className="text-[#718077]">
+                      of {money(target)}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between border-t border-[#edf0eb] pt-4 text-xs text-[#7a877e]">
+                    <span>
+                      {p.operator
+                        ? `Operator: ${p.operator.name}`
+                        : 'Operator not assigned'}
+                    </span>
+                    <span>{p._count.jobs} jobs</span>
+                  </div>
+
+                  <Link
+                    href={`/projects/${p.id}`}
+                    className="mt-4 block rounded-xl bg-[#174b38] px-4 py-3 text-center text-sm font-bold text-white"
+                  >
+                    View project
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-6 rounded-2xl border border-dashed border-[#ccd8ce] bg-white p-10 text-center">
+            <h2 className="font-extrabold text-[#244535]">
+              No projects match those filters
+            </h2>
+
+            <p className="mt-2 text-sm text-[#718077]">
+              Try a different region, equipment type or status.
+            </p>
+
+            <Link
+              href="/projects"
+              className="mt-4 inline-block text-sm font-bold text-[#174b38]"
+            >
+              Clear filters
+            </Link>
+          </div>
+        )}
+
+        {user?.role === Role.INVESTOR &&
+          user.status === UserStatus.VERIFIED && (
+            <section id="submit-project" className="mt-12">
+              <p className="text-xs font-black uppercase tracking-widest text-[#a67a1b]">
+                For equipment sponsors
+              </p>
+
+              <h2 className="mt-2 text-2xl font-black text-[#153d2e]">
+                Submit an equipment project
+              </h2>
+
+              <ProjectSubmitForm />
+            </section>
+          )}
+      </div>
+    </main>
+  );
+}
+
+function money(n: number) {
+  return new Intl.NumberFormat('en-GH', {
+    style: 'currency',
+    currency: 'GHS',
+  }).format(n);
+}

@@ -1,0 +1,2 @@
+'use client';
+export function NotificationActions({id}:{id?:string}){async function mark(){await fetch('/api/notifications',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(id?{id}:{all:true})});window.location.reload();}return <button onClick={mark} className="rounded-lg border px-3 py-2 text-xs font-semibold text-emerald-800">{id?'Mark read':'Mark all read'}</button>}

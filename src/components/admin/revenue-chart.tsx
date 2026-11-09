@@ -1,0 +1,6 @@
+'use client';
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+export function RevenueChart({data}:{data:Array<{period:string;gross:number;expenses:number;net:number}>}) {
+  if (!data.length) return <div className="rounded-2xl border border-[#e3e9e2] bg-white p-6 text-sm text-[#718077]">No distribution data yet. Run a distribution to populate this chart.</div>;
+  return <div className="rounded-2xl border border-[#e3e9e2] bg-white p-5"><h2 className="font-extrabold text-[#173f30]">Revenue and expenses</h2><p className="mb-4 mt-1 text-xs text-[#718077]">Amounts in GHS · historical records</p><div className="h-72 w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={data} margin={{top:8,right:8,left:0,bottom:4}}><CartesianGrid strokeDasharray="3 3"/><XAxis dataKey="period"/><YAxis/><Tooltip formatter={(v)=>`GHS ${Number(v).toFixed(2)}`}/><Legend/><Bar dataKey="gross" name="Gross revenue" fill="#174b38" radius={[5,5,0,0]}/><Bar dataKey="expenses" name="Expenses" fill="#e5b84b" radius={[5,5,0,0]}/><Bar dataKey="net" name="Net revenue" fill="#78a58a" radius={[5,5,0,0]}/></BarChart></ResponsiveContainer></div></div>
+}
