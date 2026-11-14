@@ -139,14 +139,14 @@ The prototype uses demo accounts only. The password for every account is `demo12
 
 ## Team
 
-| Area | Focus | Member |
-|---|---|---|
-| A | Admin and governance: approvals, users and reports | |
-| B | Investors and marketplace: project list and investing | |
-| C | Jobs and customers: job requests and expenses | |
-| D | Foundation and presentation: login, tests and documents | |
+Group One:
 
-Each member's contributions are tracked in the GitHub commit history.
+- Grace Adebayo 
+- Yahaya Innocent Adam
+- Bernard Titus Quansah
+- Ransford Paanii Tetteh
+
+Work areas: admin and governance, investors and marketplace, jobs and customers, and foundation and presentation. Each member's contributions are tracked in the GitHub commit history.
 
 ## Disclaimer
 
