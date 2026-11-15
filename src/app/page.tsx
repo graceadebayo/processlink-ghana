@@ -1,15 +1,76 @@
 import Link from 'next/link';
-import { ArrowRight, Tractor, Cog, Sprout, ShieldCheck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+
 export default function HomePage() {
-  return <main className="min-h-screen bg-[#f7f6ef]">
-    <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6"><Link href="/" className="text-xl font-black tracking-tight text-[#174b38]">Process<span className="text-[#d69c22]">Link</span> Ghana</Link><div className="flex items-center gap-3"><Link href="/login" className="px-3 py-2 text-sm font-bold text-[#174b38]">Log in</Link><Link href="/register" className="rounded-xl bg-[#174b38] px-4 py-2.5 text-sm font-bold text-white">Get started</Link></div></header>
-    <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-12 md:grid-cols-[1.1fr_.9fr] md:pt-20">
-      <div><span className="rounded-full bg-[#e8eee8] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#174b38]">Agricultural processing network</span><h1 className="mt-6 max-w-2xl text-5xl font-black leading-[1.08] tracking-tight text-[#153d2e] md:text-6xl">More access to equipment. More value for every harvest.</h1><p className="mt-6 max-w-xl text-lg leading-8 text-[#5e6c63]">ProcessLink Ghana connects the people who fund processing equipment, the operators who run it, and the farmers and processors who need it.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/register" className="btn-primary gap-2">Join ProcessLink <ArrowRight size={17}/></Link><Link href="#how-it-works" className="rounded-xl border border-[#cbd5cc] px-5 py-3 font-bold text-[#174b38]">See how it works</Link></div><p className="mt-4 text-xs text-[#78857c]">A university project prototype. Investor figures are illustrative; no real payments are processed.</p></div>
-      <div className="rounded-[2rem] bg-[#174b38] p-7 text-white shadow-xl md:p-9"><div className="flex items-center justify-between"><span className="text-sm font-bold text-[#eac45e]">THE PROCESSLINK NETWORK</span><Sprout className="text-[#eac45e]" size={28}/></div><div className="mt-8 space-y-4"><NetworkCard icon={<Tractor/>} title="Farmers & processors" text="Request reliable local processing services."/><NetworkCard icon={<Cog/>} title="Equipment operators" text="Manage equipment, jobs and operating costs."/><NetworkCard icon={<ShieldCheck/>} title="Investors" text="Support equipment access and view illustrative reports."/></div><div className="mt-7 border-t border-white/15 pt-5 text-sm text-white/70">One connected record of jobs, costs and payments.</div></div>
-    </section>
-    <section id="how-it-works" className="border-t border-[#e5e8df] bg-white px-5 py-16"><div className="mx-auto max-w-6xl"><p className="text-xs font-black uppercase tracking-widest text-[#a67a1b]">How it works</p><h2 className="mt-3 text-3xl font-black text-[#153d2e]">Three roles. One processing ecosystem.</h2><div className="mt-9 grid gap-5 md:grid-cols-3"><Info title="1. Fund equipment" text="Investors contribute toward equipment projects and follow funding progress."/><Info title="2. Operate equipment" text="Approved operators manage equipment, accept jobs and record expenses."/><Info title="3. Process produce" text="Customers request processing, track progress and complete simulated payments."/></div></div></section>
-    <footer className="px-5 py-8 text-center text-xs text-[#77847b]">© {new Date().getFullYear()} ProcessLink Ghana · Prototype for academic demonstration</footer>
-  </main>;
+  return (
+    <main className="min-h-screen bg-[#f7f6ef]">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6">
+        <Link href="/" className="text-xl font-black tracking-tight text-[#174b38]">
+          Process<span className="text-[#d69c22]">Link</span> Ghana
+        </Link>
+        <nav className="flex items-center gap-2 sm:gap-4" aria-label="Main navigation">
+          <Link href="/login" className="px-3 py-2 text-sm font-bold text-[#174b38]">
+            Log in
+          </Link>
+          <Link href="/register" className="rounded-xl bg-[#174b38] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#23684e]">
+            Create account
+          </Link>
+        </nav>
+      </header>
+
+      <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-10 md:grid-cols-[1.1fr_.9fr] md:pb-24 md:pt-16">
+        <div>
+          <span className="rounded-full bg-[#e8eee8] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#174b38]">
+            Ghanaian processing network
+          </span>
+          <h1 className="mt-6 max-w-2xl text-5xl font-black leading-[1.08] tracking-tight text-[#153d2e] md:text-6xl">
+            Fund the machine. Process the harvest.
+          </h1>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-[#5e6c63]">
+            Connect equipment investors, local operators, and the farmers and processors who need them.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/register" className="btn-primary inline-flex items-center gap-2">
+              Create account <ArrowRight size={17} />
+            </Link>
+            <Link href="/projects" className="rounded-xl border border-[#cbd5cc] px-5 py-3 font-bold text-[#174b38] transition hover:bg-white">
+              Browse marketplace
+            </Link>
+          </div>
+          <p className="mt-4 text-xs text-[#78857c]">
+            Browse projects without an account. Payments in this prototype are simulated.
+          </p>
+        </div>
+
+        <div className="rounded-[2rem] bg-[#174b38] p-7 text-white shadow-xl md:p-9">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-[#eac45e]">ONE CONNECTED NETWORK</span>
+            <span className="text-2xl text-[#eac45e]" aria-hidden="true">✳</span>
+          </div>
+          <div className="mt-8 space-y-3">
+            {[
+              ['Investors', 'Help fund processing equipment'],
+              ['Operators', 'Run equipment and serve local producers'],
+              ['Farmers & processors', 'Access nearby processing services'],
+            ].map(([title, description]) => (
+              <div key={title} className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/5 p-4">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[#eac45e]" aria-hidden="true">•</span>
+                <div>
+                  <h2 className="font-bold">{title}</h2>
+                  <p className="mt-0.5 text-sm text-white/70">{description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 border-t border-white/15 pt-5 text-xs leading-5 text-white/65">
+            Prototype only: no real payments or guaranteed returns.
+          </p>
+        </div>
+      </section>
+
+      <footer className="border-t border-[#e5e8df] px-5 py-6 text-center text-xs text-[#77847b]">
+        ProcessLink Ghana · Prototype for academic demonstration
+      </footer>
+    </main>
+  );
 }
-function NetworkCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) { return <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/5 p-4"><div className="text-[#eac45e]">{icon}</div><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm text-white/65">{text}</p></div></div>; }
-function Info({ title, text }: { title: string; text: string }) { return <div className="rounded-2xl border border-[#e4e9e3] bg-[#fbfcf9] p-6"><h3 className="font-extrabold text-[#174b38]">{title}</h3><p className="mt-3 text-sm leading-6 text-[#68766d]">{text}</p></div>; }
