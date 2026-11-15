@@ -23,9 +23,20 @@ Create a hosted PostgreSQL database (for example, Supabase). Keep the database p
 
 ## 3. Python analytics service
 
-The administrator reports page calls a separate FastAPI service. Deploy
-`services/analytics` with Python 3.10 or newer, install
-`services/analytics/requirements.txt`, and start it with:
+The administrator reports page calls a separate FastAPI service. The standalone
+visitor prototype is static HTML and does not call Python. To enable analytics in
+the authenticated administrator reports:
+
+1. In GitHub, open the repository and confirm `services/analytics/render.yaml` is present.
+2. In Render, choose **New → Blueprint**, connect `graceadebayo/processlink-ghana`, and select the branch containing this configuration.
+3. Review the `processlink-analytics` web service. Render uses the Python directory as its root, installs its requirements, starts Uvicorn, and generates a private `ANALYTICS_API_KEY`.
+4. Deploy the service and wait for its `/health` check to pass. Copy the service's public HTTPS URL from its Render dashboard.
+5. In Vercel, open the Next.js project under the intended Vercel account and go to **Settings → Environment Variables**. Add `PYTHON_ANALYTICS_URL` with the Render HTTPS URL.
+6. In Render, copy the generated `ANALYTICS_API_KEY` value. Add that same value in Vercel as `PYTHON_ANALYTICS_API_KEY`. Do not add either secret to browser-visible `NEXT_PUBLIC_` variables or commit it to Git.
+7. Redeploy the Vercel project so the new environment variables take effect. Sign in as a verified administrator and open **Financial reports** to test the Python-powered summary.
+
+For another Python host, deploy `services/analytics` with Python 3.10 or newer,
+install `services/analytics/requirements.txt`, set `ANALYTICS_API_KEY`, and start it with:
 
 ```bash
 uvicorn app:app --app-dir services/analytics --host 0.0.0.0 --port 8000
