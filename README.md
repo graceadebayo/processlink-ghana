@@ -9,6 +9,9 @@ Connecting equipment funding, operators and agricultural processing customers.
 The deployed root page serves the self-contained interactive prototype from
 `public/processlink-prototype.html`. Its role switching, demo accounts, and sample
 records are browser-only and do not use the authenticated application APIs.
+Visitors can choose **Continue as visitor** on the prototype sign-in screen to browse
+the public sample projects without entering demo credentials. Visitor mode is
+read-only and is not an authenticated user account.
 
 ## The problem
 
@@ -105,6 +108,8 @@ python -m uvicorn app:app --app-dir services\analytics --host 127.0.0.1 --port 8
 Set `PYTHON_ANALYTICS_URL` and `PYTHON_ANALYTICS_API_KEY` in `.env` to the service URL
 and the same secret used for `ANALYTICS_API_KEY`. The key is used only for
 server-to-server requests; do not expose it as a `NEXT_PUBLIC_` variable.
+The standalone visitor prototype is static HTML and does not call this Python
+service; analytics are used by the authenticated app's admin reports page.
 
 Run the tests:
 
