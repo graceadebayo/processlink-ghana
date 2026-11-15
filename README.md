@@ -6,6 +6,10 @@ Connecting equipment funding, operators and agricultural processing customers.
 
 > **Prototype.** Payments, sensors, USSD and WhatsApp are simulated. No real money moves, no investor return is guaranteed, and all project figures are demo data.
 
+The deployed root page serves the self-contained interactive prototype from
+`public/processlink-prototype.html`. Its role switching, demo accounts, and sample
+records are browser-only and do not use the authenticated application APIs.
+
 ## The problem
 
 - Processing equipment such as a cassava grater, palm fruit press or maize mill is expensive, so one farmer or small business cannot buy it alone.
