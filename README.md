@@ -59,6 +59,7 @@ The investor pool is shared by how much each investor put in. The shares are con
 ## Tech stack
 
 - Next.js and React with TypeScript
+- Python and FastAPI for administrator platform analytics
 - PostgreSQL, hosted on Neon, accessed with Prisma
 - GitHub and Vercel, with automatic deployment
 - Automated tests for the money calculations
@@ -86,10 +87,26 @@ npx prisma migrate dev
 npm run dev
 ```
 
+The admin reports page also uses the Python analytics service. In a second terminal,
+install Python 3.10 or newer and start the service:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r services\analytics\requirements.txt
+$env:ANALYTICS_API_KEY = "use-the-same-random-secret-as-PYTHON_ANALYTICS_API_KEY"
+python -m uvicorn app:app --app-dir services\analytics --host 127.0.0.1 --port 8000
+```
+
+Set `PYTHON_ANALYTICS_URL` and `PYTHON_ANALYTICS_API_KEY` in `.env` to the service URL
+and the same secret used for `ANALYTICS_API_KEY`. The key is used only for
+server-to-server requests; do not expose it as a `NEXT_PUBLIC_` variable.
+
 Run the tests:
 
 ```bash
 npm test
+python -m unittest discover -s services/analytics/tests -v
 ```
 
 ## Project structure
