@@ -23,6 +23,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           data: { operatorId: application.operatorId },
         });
         if (assigned.count !== 1) throw new Error('EQUIPMENT_ALREADY_ASSIGNED');
+        // Fully funded equipment that now has an approved operator goes live,
+        // so customers can request jobs. (Previously nothing ever set ACTIVE.)
+        await tx.equipment.updateMany({
+          where: { id: application.equipmentId, status: 'FUNDED' },
+          data: { status: 'ACTIVE' },
+        });
       }
       await tx.operatorApplication.update({ where: { id }, data: { status: parsed.data.decision === 'APPROVE' ? ApplicationStatus.APPROVED : ApplicationStatus.REJECTED } });
       await tx.auditLog.create({ data: { adminId: admin.id, action: `OPERATOR_APPLICATION_${parsed.data.decision}${parsed.data.note ? `: ${parsed.data.note}` : ''}`, targetType: 'OPERATOR_APPLICATION', targetId: id } });

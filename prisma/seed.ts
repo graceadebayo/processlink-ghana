@@ -52,7 +52,7 @@ async function main() {
   ] });
   const distribution = await prisma.distribution.create({ data: { equipmentId: projects[0].id, periodStart: new Date('2026-10-01'), periodEnd: new Date('2026-10-31'), grossRevenue: 900, expenses: 200, netRevenue: 700, platformAmount: 70, operatorAmount: 280, investorPool: 350 } });
   await prisma.investorPayout.createMany({ data: [
-    { distributionId: distribution.id, investorId: investors[0].id, amount: 105 },
+    { distributionId: distribution.id, investorId: investors[0].id, amount: 123.53 },
     { distributionId: distribution.id, investorId: investors[1].id, amount: 144.12 },
     { distributionId: distribution.id, investorId: investors[2].id, amount: 82.35 },
   ] });
